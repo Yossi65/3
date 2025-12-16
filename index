@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מערכת ניהול - גרסה מתוקנת מלאה</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* --- DESIGN SYSTEM --- */
+        :root {
+            --bg-body: #e3e8ef;
+            --card-bg: #e6ebef;
+            --clay-bg: #eef2f6;
+            
+            --primary: #4f46e5;
+            --text-main: #4a5568;
+            --text-sec: #718096;     
+            --shadow-light: -8px -8px 16px 0px rgba(255, 255, 255, 0.8);
+            --shadow-dark: 8px 8px 16px 0px rgba(166, 180, 200, 0.7);
+            --shadow-inset: inset 6px 6px 10px 0 rgba(166, 180, 200, 0.7), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.8);
+            --radius: 24px;
+            --bottom-nav-height: 80px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px 15px;
+            padding-bottom: calc(var(--bottom-nav-height) + 20px);
+            min-height: 100vh;
+        }
+
+        /* --- Layout --- */
+        .container { width: 100%; max-width: 600px; margin: 0 auto; }
+        
+        h1 { font-size: 1.8rem; margin-bottom: 5px; color: #2d3748; font-weight: 700; text-align: center; }
+
+        /* --- Home Buttons --- */
+        .home-buttons-row {
+            display: grid; 
+            grid-template-columns: 1fr 1fr;
+            gap: 15px; 
+            margin-bottom: 25px; 
+            margin-top: 15px;
+        }
+        .home-btn {
+            background: var(--clay-bg); border: none; border-radius: 20px;
+            padding: 15px 5px; height: 110px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: var(--shadow-dark), var(--shadow-light);
+            cursor: pointer; transition: transform 0.2s; color: var(--text-main);
+        }
+        .home-btn:active { box-shadow: var(--shadow-inset); transform: scale(0.96); }
+        .home-btn i { font-size: 2rem; margin-bottom: 5px; background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .home-btn span { font-size: 0.9rem; font-weight: 700; line-height: 1.2; text-align: center; }
+
+        .icon-quote { background-image: linear-gradient(to right, #4facfe, #00f2fe); }
+        .icon-tasks { background-image: linear-gradient(to right, #43e97b, #38f9d7); }
+
+        /* List Styles */
+        .client-block {
+            background: #fff0f0; 
+            padding: 12px 15px; border-radius: 18px;
+            box-shadow: var(--shadow-dark), var(--shadow-light); 
+            border: 2px solid #ffb3b3; 
+            transition: 0.2s; margin-bottom: 12px;
+        }
+        .client-block.closed { 
+            border-color: #4a90e2; 
+            background: #f0f7ff;   
+        }
+
+        .client-header-compact {
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; padding-bottom: 5px;
+        }
+        .client-name-bold { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+        .client-info-row { font-size: 0.85rem; color: var(--text-sec); display: flex; gap: 10px; align-items: center; }
+
+        /* Action Buttons Row */
+        .client-actions-row {
+            display: flex; gap: 10px; justify-content: space-between; overflow-x: auto;
+            padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.05); margin-top: 5px;
+        }
+        .action-icon-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 45px; cursor: pointer; }
+        .mini-circle-btn {
+            width: 38px; height: 38px; border-radius: 50%; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; background: var(--clay-bg); 
+            box-shadow: var(--shadow-dark), var(--shadow-light); color: var(--text-main);
+        }
+        .mini-circle-btn:active { box-shadow: var(--shadow-inset); transform: scale(0.95); }
+        .action-text { font-size: 0.7rem; color: var(--text-sec); font-weight: 500; }
+        
+        .btn-col-green { color: #10b981; } .btn-col-purple { color: #8b5cf6; }
+        .btn-col-blue { color: #0ea5e9; } .btn-col-wa { color: #25D366; }
+        .btn-col-dark { color: #1e40af; } .btn-col-gray { color: #64748b; } .btn-col-red { color: #ef4444; }
+
+        /* --- TASKS VIEW --- */
+        .task-list-container { display: flex; flex-direction: column; gap: 20px; padding-bottom: 20px; }
+        .task-client-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px; padding: 0 5px; }
+        .task-client-name { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+        .task-client-date { font-size: 0.9rem; color: #94a3b8; font-weight: 500; direction: ltr; }
+        .task-row-clean { display: flex; align-items: center; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .task-text-clean { font-size: 1rem; color: var(--text-main); font-weight: 400; text-align: right; flex:1; }
+        .task-text-clean.done { text-decoration: line-through; color: #cbd5e1; }
+        .task-actions-clean { display: flex; gap: 0; align-items: center; justify-content: flex-end; min-width: 40px; }
+        .task-icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #cbd5e1; transition: 0.2s; padding: 5px; }
+        .task-icon-btn.check:hover { color: #10b981; transform: scale(1.1); }
+        .add-task-link { font-size: 0.9rem; color: #64748b; cursor: pointer; margin-top: 5px; display: inline-block; text-decoration: underline; margin-right: 5px; }
+
+        /* --- Navigation Bar --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: var(--bottom-nav-height); background: rgba(230, 235, 239, 0.95);
+            backdrop-filter: blur(10px); display: flex; justify-content: space-around; 
+            align-items: center; box-shadow: 0 -5px 20px rgba(166, 180, 200, 0.3);
+            z-index: 5000; border-top-left-radius: 30px; border-top-right-radius: 30px;
+        }
+        .nav-item { background: transparent; border: none; color: var(--text-sec); cursor: pointer; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; }
+        .nav-item.main-action { 
+            position: relative; top: -30px; background: var(--clay-bg); color: var(--primary);
+            width: 65px; height: 65px; border-radius: 50%; box-shadow: var(--shadow-dark), var(--shadow-light);
+            display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+        }
+        .nav-item.main-action:active { box-shadow: var(--shadow-inset); transform: translateY(-30px) scale(0.95); }
+
+        /* --- Sidebar (Menu) --- */
+        .sidebar { 
+            height: 100%; width: 0; position: fixed; z-index: 6000; top: 0; right: 0; 
+            background: var(--card-bg); overflow-x: hidden; transition: 0.4s; 
+            padding-top: 60px; box-shadow: -5px 0 15px rgba(0,0,0,0.1); 
+        }
+        .sidebar.open { width: 300px; padding: 20px; }
+
+        /* --- App Views --- */
+        .app-view { display: none; animation: popIn 0.3s ease; }
+        .app-view.active { display: block; }
+        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Forms & Inputs --- */
+        .section-card {
+            background: var(--card-bg); border-radius: 24px; padding: 20px;
+            margin-bottom: 20px; box-shadow: var(--shadow-inset); border: 1px solid rgba(255,255,255,0.5);
+        }
+        .form-field-wrapper { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-sec); font-size: 0.9rem; }
+        input, select, textarea { 
+            width: 100%; padding: 14px; border: none; border-radius: 15px; 
+            font-size: 1rem; outline: none; background: var(--clay-bg); 
+            color: #2d3748; box-shadow: var(--shadow-inset); font-family: 'Rubik', sans-serif;
+        }
+        
+        .btn { 
+            background: var(--clay-bg); border: none; padding: 12px; border-radius: 15px; 
+            font-weight: 600; cursor: pointer; box-shadow: var(--shadow-dark), var(--shadow-light); 
+            color: var(--text-main); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn:active { box-shadow: var(--shadow-inset); transform: scale(0.97); }
+        .btn-success { color: #059669; } .btn-info { color: #0284c7; } .btn-danger { color: #dc2626; }
+        .btn-purple { color: #7c3aed; } .btn-whatsapp { color: #25D366; } .btn-sm { padding: 8px 12px; font-size: 0.85rem; }
+
+        .main-save-button { 
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); 
+            color: white; width: 100%; padding: 16px; border-radius: 20px; 
+            font-size: 1.1rem; margin-top: 25px; box-shadow: 0 10px 20px rgba(109, 40, 217, 0.3); border:none;
+        }
+
+        /* --- Modals --- */
+        .modal { display: none; position: fixed; z-index: 7000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(226, 232, 240, 0.8); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
+        .modal-content { background: var(--card-bg); width: 95%; max-width: 500px; max-height: 90vh; overflow-y: auto; border-radius: 25px; padding: 20px; box-shadow: 20px 20px 60px rgba(166, 180, 200, 0.5), -20px -20px 60px #fff; }
+
+        /* --- Settings Tabs --- */
+        .settings-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { flex: 1; background: var(--clay-bg); border: none; padding: 10px; border-radius: 12px; color: var(--text-sec); font-weight: 600; cursor: pointer; box-shadow: var(--shadow-dark), var(--shadow-light); transition: 0.2s; white-space: nowrap; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow-inset); }
+        .settings-tab-content { display: none; animation: fadeIn 0.3s; }
+        .settings-tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Filters */
+        .clients-filter-bar { display: flex; gap: 10px; margin-bottom: 15px; }
+        .filter-btn { flex: 1; padding: 10px; border-radius: 15px; border: none; background: var(--clay-bg); color: var(--text-sec); font-weight: 600; cursor: pointer; box-shadow: var(--shadow-dark), var(--shadow-light); }
+        .filter-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow-inset); }
+
+        /* Services */
+        .service-item { background: var(--clay-bg); padding: 12px; border-radius: 15px; text-align: center; box-shadow: var(--shadow-dark), var(--shadow-light); margin-bottom: 10px; cursor: pointer; border: 2px solid transparent; display: flex; justify-content: space-between; align-items: center; }
+        .service-item.selected { border-color: var(--primary); box-shadow: var(--shadow-inset); }
+        .qty-ctrl { display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.5); border-radius: 50px; padding: 2px 6px; }
+        .category-header { padding: 8px; border-radius: 12px; color: white; font-weight: 700; margin-bottom: 8px; text-align: center; margin-top: 15px; }
+        .header-stills { background: linear-gradient(to right, #4facfe, #00f2fe); }
+        .header-video { background: linear-gradient(to right, #ff758c, #ff7eb3); }
+        .header-female { background: linear-gradient(to right, #a18cd1, #fbc2eb); }
+        .header-deliverables { background: linear-gradient(to right, #f6d365, #fda085); }
+        .header-extras { background: linear-gradient(to right, #84fab0, #8fd3f4); }
+
+        /* Schedule Modal Extras */
+        .family-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 5px; }
+        .family-table td { padding: 5px; vertical-align: middle; }
+        .family-col-header { font-weight: 700; color: var(--primary); text-align: center; font-size: 0.9rem; }
+        
+        .sector-btn-group { display: flex; gap: 8px; margin-top: 5px; }
+        .sector-btn { flex: 1; padding: 10px; background: var(--clay-bg); border: none; border-radius: 12px; box-shadow: var(--shadow-dark), var(--shadow-light); color: var(--text-sec); font-weight: 600; cursor: pointer; }
+        .sector-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow-inset); }
+
+        .calc-result-display { font-size: 0.85rem; margin-top: 5px; text-align: center; background: rgba(255,255,255,0.5); padding: 5px; border-radius: 8px; min-height: 20px; display: none; }
+        .calc-result-display.visible { display: block; }
+        .text-red { color: #e11d48; font-weight: 700; }
+        .text-gray { color: #64748b; font-size: 0.8rem; }
+
+        .hidden { display: none; }
+        .feedback-message { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #2d3748; color: white; padding: 10px 25px; border-radius: 50px; z-index: 5000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+        /* --- תוספות חדשות לניהול שירותים --- */
+        .service-manage-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; background: #fff; padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .service-manage-row input, .service-manage-row select { padding: 8px; font-size: 0.9rem; margin-bottom: 0; }
+        .delete-svc-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 8px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+
+    </style>
+</head>
+
+<body>
+
+    <nav class="bottom-nav">
+        <button class="nav-item" onclick="switchView('home')">
+            <i class="fa-solid fa-house" style="font-size:1.4rem;"></i>
+            <span>בית</span>
+        </button>
+
+        <button class="nav-item" onclick="openModal('servicesManagementModal'); renderManagementList()">
+            <i class="fa-solid fa-tags" style="font-size:1.4rem;"></i>
+            <span>שירותים</span>
+        </button>
+
+        <button id="mainActionBtn" class="nav-item main-action" onclick="handleMainAction()">
+            <i class="fa-solid fa-floppy-disk"></i>
+        </button>
+
+        <button class="nav-item" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars" style="font-size:1.4rem;"></i>
+            <span>תפריט</span>
+        </button>
+    </nav>
+
+    <div class="sidebar" id="sidebar">
+        <button class="btn btn-danger" style="position:absolute; top:20px; left:20px;" onclick="toggleSidebar()">✕</button>
+        <h2 style="margin-top:40px; text-align:center;">תפריט ניהול</h2>
+        <div style="padding:0 20px;">
+            <button onclick="openModal('servicesManagementModal'); toggleSidebar(); renderManagementList()" class="btn" style="width:100%; margin-bottom:12px; justify-content:flex-start;"><i class="fa-solid fa-tags"></i> ניהול שירותים</button>
+            <button onclick="openModal('settingsModal'); toggleSidebar()" class="btn" style="width:100%; margin-bottom:12px; justify-content:flex-start;"><i class="fa-solid fa-gear"></i> הגדרות עסק</button>
+            <button onclick="openModal('calculationSettingsModal'); toggleSidebar()" class="btn" style="width:100%; margin-bottom:12px; justify-content:flex-start;"><i class="fa-solid fa-calculator"></i> הגדרות שכר</button>
+            <button onclick="exportDataManual()" class="btn" style="width:100%; margin-bottom:12px; justify-content:flex-start;"><i class="fa-solid fa-download"></i> גיבוי נתונים</button>
+            <button onclick="document.getElementById('restoreInput').click()" class="btn" style="width:100%; margin-bottom:12px; justify-content:flex-start; background:#e0e7ff; color:#4338ca;">
+                <i class="fa-solid fa-upload"></i> שחזור נתונים
+            </button>
+            <input type="file" id="restoreInput" style="display: none;" onchange="restoreDataManual(this)" accept=".json">
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div id="homeView" class="app-view active">
+            <h1 id="welcomeTitle">שלום, צלם</h1>
+            
+            <div class="home-buttons-row">
+                <button class="home-btn" onclick="switchView('quote')">
+                    <i class="fa-solid fa-file-invoice-dollar icon-quote"></i>
+                    <span>הצעות<br>מחיר</span>
+                </button>
+                <button class="home-btn" onclick="switchView('tasks')">
+                    <i class="fa-solid fa-list-check icon-tasks"></i>
+                    <span>משימות<br>לביצוע</span>
+                </button>
+            </div>
+
+            <div class="clients-filter-bar">
+                <button class="filter-btn active" id="filterAllBtn" onclick="setClientFilter('all')">הכל</button>
+                <button class="filter-btn" id="filterOpenBtn" onclick="setClientFilter('open')">פתוח</button>
+                <button class="filter-btn" id="filterClosedBtn" onclick="setClientFilter('closed')">סגור</button>
+                <button class="filter-btn" id="filterArchiveBtn" onclick="setClientFilter('archive')" style="color: #d97706;"><i class="fa-solid fa-box-archive"></i> ארכיון</button>
+            </div>
+
+            <input type="text" id="clientSearchInput" placeholder="חפש לקוח..." style="margin-bottom:20px;" oninput="renderClientsGrid()">
+            
+            <div id="clientsGrid" class="compact-list-container">
+                </div>
+        </div>
+
+        <div id="quoteView" class="app-view">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <button class="back-btn" onclick="switchView('home')" style="width:auto; margin:0;"><i class="fa-solid fa-arrow-right"></i></button>
+                <h1 style="margin:0; font-size:1.5rem;">ניהול אירוע</h1>
+            </div>
+
+            <div id="printHeaderDiv" style="display: none;">
+                <img id="printedLogo" src="#" alt="לוגו" style="max-width: 150px; display:none;">
+                <div class="print-header-info">
+                    <p><strong id="printedBusinessName"></strong></p>
+                    <p id="printedBusinessPhone"></p>
+                    <p id="printedBusinessEmail"></p>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:20px; overflow-x:auto; padding-bottom:5px;">
+                <button id="copyToClipboardBtn" class="btn btn-info" style="flex:1; min-width:100px;">📋 העתק</button>
+                <button id="exportToImageBtn" class="btn btn-purple" style="flex:1; min-width:100px;">🖼️ תמונה</button>
+                <button id="convertToPdfBtn" class="btn btn-danger" style="flex:1; min-width:100px;">📄 PDF</button>
+                <button id="addToGoogleCalendarBtn" class="btn btn-success" style="flex:1; min-width:100px;">📅 יומן</button>
+            </div>
+
+            <div class="section-card">
+                <div style="display:flex; gap:10px; margin-bottom:12px;">
+                    <div style="flex:1;">
+                        <label>שם הלקוח:</label>
+                        <input type="text" id="clientName">
+                    </div>
+                    <div style="flex:1;">
+                        <label>אימייל:</label>
+                        <div class="input-group">
+                            <input type="email" id="clientEmail">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-bottom:12px;">
+                    <div style="flex:1;">
+                        <label>טלפון צד כלה:</label>
+                        <div class="input-group">
+                            <input type="tel" id="clientPhone">
+                            <button class="btn btn-sm btn-success" style="padding:0 8px;" onclick="openDialer('clientPhone')"><i class="fa-solid fa-phone"></i></button>
+                        </div>
+                    </div>
+                    <div style="flex:1;">
+                        <label>טלפון צד חתן:</label>
+                        <div class="input-group">
+                            <input type="tel" id="clientPhone2">
+                            <button class="btn btn-sm btn-success" style="padding:0 8px;" onclick="openDialer('clientPhone2')"><i class="fa-solid fa-phone"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-bottom:12px;">
+                    <div style="flex:1;">
+                        <label>תאריך:</label>
+                        <input type="date" id="eventDate">
+                    </div>
+                    <div style="flex:1;">
+                        <label>מקום:</label>
+                        <input type="text" id="venueName">
+                    </div>
+                </div>
+
+                <div style="background:var(--clay-bg); padding:10px; border-radius:15px; text-align:center; color:var(--primary); margin-bottom:15px; box-shadow:var(--shadow-inset);" id="hebrewDateBox">--</div>
+                
+                <div id="dashboardScheduleSection" style="display:none; background:rgba(255,255,255,0.5); padding:15px; border-radius:15px; margin-top:10px; border:1px solid #c084fc;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h4 style="margin:0; color:#6b21a8;">זמנים ומשפחה</h4>
+                        <button class="btn btn-sm btn-purple" onclick="openSchedule(editingQuoteId)"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                    <div style="font-size:0.9rem; line-height:1.6;">
+                        <div><strong>חופה:</strong> <span id="dashChuppahTime">--</span> | <strong>התחלה:</strong> <span id="dashStartTime">--</span></div>
+                        <div><strong>משפחות:</strong> <span id="dashFamilies">--</span></div>
+                    </div>
+                </div>
+                <div class="form-field-wrapper" style="margin-top:10px;"><label>הערות:</label><textarea id="quoteNotes" rows="2"></textarea></div>
+            </div>
+
+            <div class="section-card">
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label>וידאו (עלות):</label>
+                        <div class="input-group">
+                            <input type="text" id="videographerName" placeholder="שם">
+                            <input type="number" id="videographerCost" placeholder="0" onchange="updateSummary()" style="width:60px;">
+                        </div>
+                    </div>
+                    <div style="flex:1;">
+                        <label>צלמת (עלות):</label>
+                        <div class="input-group">
+                            <input type="text" id="femalePhotographerName" placeholder="שם">
+                            <input type="number" id="femalePhotographerCost" placeholder="0" onchange="updateSummary()" style="width:60px;">
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="photographerName">
+                <input type="hidden" id="photographerCost" value="0">
+            </div>
+
+            <div class="section-card">
+                <h3 style="margin-bottom:10px;">שירותים</h3>
+                <div id="servicesContainer"></div>
+            </div>
+
+            <div class="section-card">
+                <div class="form-field-wrapper"><label>מקדמה ששולמה:</label><input type="number" id="amountPaid" value="0" style="font-size:1.2rem; font-weight:bold; color:var(--primary);"></div>
+                <hr style="margin:15px 0; opacity:0.2;">
+                <div style="text-align:center;">
+                    <div style="font-size:1.4rem; font-weight:700;">סה"כ: <span id="finalTotalCost">0</span> ₪</div>
+                    <div style="color:var(--text-sec); font-size:0.9rem;">רווח משוער: <span id="estimatedProfit">0</span> ₪</div>
+                    <div style="color:#e11d48; font-weight:700; font-size:1.2rem; margin-top:5px;">יתרה: <span id="balanceDue">0</span> ₪</div>
+                </div>
+                <div id="wageSummaryContainer" style="display:none; background:#fff7ed; padding:10px; border-radius:10px; margin-top:10px; font-size:0.85rem;"></div>
+            </div>
+            
+            <button id="saveQuoteBtn" class="main-save-button"><i class="fa-solid fa-floppy-disk"></i> שמור פרטי הצעה</button>
+            <button onclick="openWage(editingQuoteId)" class="btn" style="width:100%; margin-top:10px; background:#fff; color:#4a5568;">סגירת אירוע / שכר</button>
+        </div>
+
+        <div id="tasksView" class="app-view">
+            <button class="back-btn" onclick="switchView('home')"><i class="fa-solid fa-arrow-right"></i> חזרה לתפריט הראשי</button>
+            <h1>משימות</h1>
+            <div id="globalTasksContainer" class="task-list-container">
+                </div>
+        </div>
+
+    </div>
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                 <h2 style="margin:0; font-size:1.4rem; color:var(--primary);">ניהול זמנים</h2>
+                 <span class="close-button" onclick="closeModal('scheduleModal')">&times;</span>
+            </div>
+            
+            <div style="text-align:center; margin-bottom:15px; background:var(--clay-bg); padding:10px; border-radius:15px; box-shadow:var(--shadow-inset);">
+                <div id="schedDateDisplay" style="font-weight:bold; color:var(--text-sec);"></div>
+                <div id="schedNameDisplay" style="font-size:1.2rem; font-weight:700; color:var(--text-main);"></div>
+            </div>
+
+            <input type="hidden" id="scheduleQuoteId">
+            
+            <div class="section-card" style="padding:15px;">
+                <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--primary);">פרטי קשר ומיקום</h4>
+                <div class="form-field-wrapper"><label>טלפון ראשי</label><input type="tel" id="schedPhone1"></div>
+                <div class="form-field-wrapper"><label>טלפון נוסף</label><input type="tel" id="schedPhone2"></div>
+                <div class="form-field-wrapper"><label>מקום האירוע</label><input type="text" id="schedVenue"></div>
+            </div>
+
+            <div class="section-card" style="padding:15px;">
+                <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--primary);">משפחות</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div><label>מש. כלה</label><input type="text" id="schedBrideFam"></div>
+                    <div><label>מש. חתן</label><input type="text" id="schedGroomFam"></div>
+                </div>
+            </div>
+
+            <div class="section-card" style="padding:15px;">
+                <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--primary);">שעון זמנים</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                    <div><label>התחלה</label><input type="tel" id="schedStart" onblur="formatTime(this)" placeholder="13:00"></div>
+                    <div><label>קב"פ</label><input type="tel" id="schedReception" onblur="formatTime(this)" placeholder="19:00"></div>
+                    <div><label>חופה</label><input type="tel" id="schedChuppah" onblur="formatTime(this)" placeholder="20:00"></div>
+                </div>
+            </div>
+
+            <div class="section-card" style="padding:15px; background:#f0fdf4; border-color:#86efac;">
+                <label style="font-weight:bold;">📸 צילומי חוץ</label>
+                <select id="schedOutdoorSelect" onchange="toggleOutdoor()" style="margin-top:5px;">
+                    <option value="no">ללא</option>
+                    <option value="yes">יש</option>
+                </select>
+                <div id="schedOutdoorWrapper" style="display:none; margin-top:10px;">
+                    <input type="text" id="schedOutdoorLoc" placeholder="הכנס מיקום...">
+                </div>
+            </div>
+
+            <div class="section-card" style="padding:15px;">
+                <h4 style="margin:0 0 5px 0; font-size:0.9rem; color:var(--primary);">הרכב משפחה</h4>
+                <table class="family-table">
+                    <tr>
+                        <td></td>
+                        <td class="family-col-header">אחים</td>
+                        <td class="family-col-header">נשואים</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold; color:#5b21b6;">צד חתן</td>
+                        <td><input type="number" id="schedGroomSib" style="text-align:center;"></td>
+                        <td><input type="number" id="schedGroomMar" style="text-align:center;"></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold; color:#db2777;">צד כלה</td>
+                        <td><input type="number" id="schedBrideSib" style="text-align:center;"></td>
+                        <td><input type="number" id="schedBrideMar" style="text-align:center;"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section-card" style="padding:15px;">
+                <h4 style="margin:0 0 10px 0; font-size:0.9rem; color:var(--primary);">מגזר</h4>
+                <div class="sector-btn-group">
+                    <button type="button" class="sector-btn" id="secSephardic" onclick="setSector('sephardic')">ספרדי</button>
+                    <button type="button" class="sector-btn" id="secLitvish" onclick="setSector('litvish')">ליטאי</button>
+                    <button type="button" class="sector-btn" id="secHasidic" onclick="setSector('hasidic')">חסידי</button>
+                </div>
+                <div id="schedHasidutWrapper" style="display:none; margin-top:10px;">
+                    <input type="text" id="schedHasidutName" placeholder="שם החסידות...">
+                </div>
+            </div>
+
+            <div class="form-field-wrapper">
+                <label>הערות זמנים/דגשים:</label>
+                <textarea id="schedNotes" rows="3"></textarea>
+            </div>
+
+            <button class="main-save-button" onclick="saveScheduleData()" style="background:var(--primary);">שמור זמנים</button>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2 style="text-align:center;">הגדרות</h2>
+            <div class="settings-tabs">
+                <button class="tab-btn active" onclick="openSettingsTab(event, 'tab-biz')">🏠 פרטי עסק</button>
+                <button class="tab-btn" onclick="openSettingsTab(event, 'tab-msg')">📝 הודעות</button>
+                <button class="tab-btn" onclick="openSettingsTab(event, 'tab-adv')">🛠️ מתקדם</button>
+            </div>
+
+            <div id="tab-biz" class="settings-tab-content active">
+                <div class="section-card" style="margin-top:0;">
+                    <h4 style="margin:0 0 10px 0;">לוגו ועיצוב</h4>
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <input type="file" id="logoFileInput" style="flex:1;">
+                        <button id="removeLogoBtn" class="btn btn-danger btn-sm">הסר</button>
+                    </div>
+                    <label>כותרת ראשית:</label>
+                    <input type="text" id="welcomeTitleInput" placeholder="ברוכים הבאים">
+                </div>
+                <div class="section-card">
+                    <h4 style="margin:0 0 10px 0;">פרטי קשר</h4>
+                    <label>שם העסק:</label><input type="text" id="businessNameInput">
+                    <label>טלפון:</label><input type="tel" id="businessPhoneInput">
+                    <label>אימייל:</label><input type="email" id="businessEmailInput">
+                </div>
+            </div>
+
+            <div id="tab-msg" class="settings-tab-content">
+                <div class="section-card" style="margin-top:0;">
+                    <h4 style="margin:0 0 10px 0;">וואטסאפ</h4>
+                    <label>טקסט קבוע:</label><textarea id="whatsappCustomTextInput" rows="3"></textarea>
+                </div>
+                <div class="section-card">
+                    <h4 style="margin:0 0 10px 0;">מסמכים</h4>
+                    <label>טקסט עליון:</label><input type="text" id="docHeaderText">
+                    <label style="margin-top:10px;">פוטר:</label><textarea id="footerNoteTextarea" rows="2"></textarea>
+                </div>
+            </div>
+
+            <div id="tab-adv" class="settings-tab-content">
+                <div class="section-card" style="margin-top:0; background:#eff6ff;">
+                    <h4 style="margin:0 0 10px 0;">גיבוי לטלגרם</h4>
+                    <label>Token:</label><input type="text" id="telegramTokenInput" style="direction:ltr;">
+                    <label style="margin-top:5px;">Chat ID:</label><input type="text" id="telegramChatIdInput" style="direction:ltr;">
+                </div>
+                <div class="section-card" style="background:#fef2f2;">
+                    <h4 style="margin:0 0 10px 0; color:#dc2626;">איפוס</h4>
+                    <button id="resetAppBtn" class="btn btn-danger" style="width:100%;">מחיקת הכל</button>
+                </div>
+            </div>
+
+            <button onclick="saveSettings()" class="main-save-button" style="margin-top:10px;">שמור וסגור</button>
+        </div>
+    </div>
+
+    <div id="eventWageModal" class="modal">
+        <div class="modal-content">
+            <h2 style="text-align:center;">סגירת אירוע וחישוב שכר</h2>
+            <input type="hidden" id="currentQuoteIdForWage">
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div class="section-card" style="padding:10px; margin:0;">
+                    <label>סטילס (שעות):</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="time" id="wagePStart" oninput="calculateRealTimeWage()" onchange="calculateRealTimeWage()"> 
+                        <input type="time" id="wagePEnd" oninput="calculateRealTimeWage()" onchange="calculateRealTimeWage()">
+                    </div>
+                    <div id="pWageResult" class="calc-result-display"></div>
+                </div>
+                
+                <div class="section-card" style="padding:10px; margin:0;">
+                    <label>וידאו (שעות):</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="time" id="wageVStart" oninput="calculateRealTimeWage()" onchange="calculateRealTimeWage()"> 
+                        <input type="time" id="wageVEnd" oninput="calculateRealTimeWage()" onchange="calculateRealTimeWage()">
+                    </div>
+                    <div id="vWageResult" class="calc-result-display"></div>
+                </div>
+            </div>
+
+            <div class="form-field-wrapper">
+                <label>הוצאות/תוספות מיוחדות (₪):</label>
+                <input type="number" id="wageExtras" value="0" oninput="calculateRealTimeWage()" onchange="calculateRealTimeWage()">
+            </div>
+
+            <div class="section-card" style="background:#f0fdf4; border:1px solid #86efac; padding:15px;">
+                <label>שם החותם (מאשר):</label><input type="text" id="signatoryName">
+                
+                <label style="margin-top:10px;">תשלום באירוע (סה"כ):</label>
+                <input type="number" id="wagePaidNow" value="0" oninput="calculateRealTimeWage()" onchange="calculateRealTimeWage()">
+                
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <div style="flex:1"><label>צד חתן (₪):</label><input type="number" id="paymentGroomSide" value="0" oninput="calculateRealTimeWage()" onchange="calculateRealTimeWage()"></div>
+                    <div style="flex:1"><label>צד כלה (₪):</label><input type="number" id="paymentBrideSide" value="0" oninput="calculateRealTimeWage()" onchange="calculateRealTimeWage()"></div>
+                </div>
+            </div>
+
+            <div id="signatureArea" style="text-align:center; margin:15px 0;">
+                <img id="savedSigImg" style="display:none; max-width:150px; margin:0 auto;">
+                <button class="btn btn-info btn-sm" onclick="openSignatureModal()">✍️ חתימה דיגיטלית</button>
+            </div>
+
+            <button class="btn btn-success" style="width:100%;" onclick="saveWageData()">שמור וסגור אירוע</button>
+            <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="closeModal('eventWageModal')">ביטול</button>
+        </div>
+    </div>
+    <div id="allTasksModal" class="modal">
+        <div class="modal-content">
+            <h2 style="text-align:center;">משימות ללקוח</h2>
+            <input type="hidden" id="taskQuoteId">
+            <div id="clientTasksList"></div>
+            <div class="input-group" style="margin-top:15px;">
+                <input type="text" id="newClientTask" placeholder="משימה חדשה...">
+                <button class="btn btn-success" onclick="addClientTask()">הוסף</button>
+            </div>
+            <button class="btn btn-danger" style="width:100%; margin-top:15px;" onclick="closeModal('allTasksModal')">סגור</button>
+        </div>
+    </div>
+
+    <div id="servicesManagementModal" class="modal">
+        <div class="modal-content">
+            <h2>ניהול שירותים</h2>
+            <div style="margin-bottom:15px; border-bottom:1px solid #ddd; padding-bottom:15px;">
+                <h4 style="margin:0 0 5px 0;">הוספת שירות חדש</h4>
+                <select id="newServiceCategory" style="margin-bottom:5px;">
+                    <option value="stills">סטילס</option>
+                    <option value="video">וידאו</option>
+                    <option value="female">צלמת</option>
+                    <option value="deliverables">חבילה</option>
+                    <option value="extras">תוספות</option>
+                </select>
+                <input type="text" id="newServiceName" placeholder="שם השירות" style="margin-bottom:5px;">
+                
+                <input type="number" id="newServicePrice" placeholder="מחיר (₪)" style="margin-bottom:5px;">
+                
+                <input type="number" id="newServiceInternalCost" placeholder="עלות (כמה עולה לי)" style="margin-bottom:5px; background:#fff0f0;">
+                
+                <button onclick="addNewService()" class="btn btn-success" style="width:100%;">הוסף לרשימה</button>
+            </div>
+            
+            <h4 style="margin:0 0 10px 0;">רשימת שירותים קיימים</h4>
+            <div id="priceSettings" style="max-height:300px; overflow-y:auto;"></div>
+            
+            <button onclick="closeModal('servicesManagementModal')" class="btn btn-danger" style="width:100%; margin-top:10px;">סגור</button>
+        </div>
+    </div>
+
+    <div id="calculationSettingsModal" class="modal">
+        <div class="modal-content">
+            <h2>הגדרות שכר</h2>
+            <div class="section-card" style="margin-bottom:10px;">
+                <h4>סטילס</h4>
+                <div style="display:flex; gap:10px;"><input type="number" id="photographerStandardWorkHours" placeholder="שעות"><input type="number" id="photographerOvertimeRate" placeholder="תעריף"></div>
+            </div>
+            <div class="section-card">
+                <h4>וידאו</h4>
+                <div style="display:flex; gap:10px;"><input type="number" id="videographerStandardWorkHours" placeholder="שעות"><input type="number" id="videographerOvertimeRate" placeholder="תעריף"></div>
+            </div>
+            <button id="saveCalculationSettingsBtn" class="main-save-button">שמור</button>
+            <button onclick="closeModal('calculationSettingsModal')" class="btn btn-danger" style="width:100%; margin-top:10px;">סגור</button>
+        </div>
+    </div>
+
+    <div id="signatureModal" class="modal">
+        <div class="modal-content" style="text-align:center;">
+            <h2>חתימה דיגיטלית</h2>
+            <p style="font-size:0.8rem; color:#666;">יש לחתום בתוך המסגרת</p>
+            
+            <div style="background:#fff; border:2px dashed #cbd5e1; border-radius:15px; display:inline-block; overflow:hidden;">
+                <canvas id="sigCanvas" width="300" height="150" style="touch-action: none; cursor: crosshair;"></canvas>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:15px; justify-content:center;">
+                <button class="btn btn-danger" onclick="clearSig()"><i class="fa-solid fa-eraser"></i> נקה</button>
+                <button class="btn btn-success" onclick="saveSig()"><i class="fa-solid fa-check"></i> אשר חתימה</button>
+            </div>
+            
+            <button class="btn" style="width:100%; margin-top:15px; background:#e2e8f0;" onclick="closeModal('signatureModal')">ביטול</button>
+        </div>
+    </div>
+
+    <div id="feedbackMessage" class="feedback-message"></div>
+    <script>
+    // --- משתנים גלובליים (State) ---
+    let serviceItems = [];
+    let appSettings = {};
+    let editingQuoteId = null;
+    let currentlyLoadedQuoteData = null;
+    let currentSignatureDataUrl = null;
+    let currentQuoteIdForTasks = null;
+    let currentQuoteIdForSchedule = null;
+    let currentSelectedSector = null;
+    let currentClientFilter = 'all';
+
+    let calculationSettings = { 
+        photographerStandardWorkHours: 8, photographerOvertimeRate: 150, 
+        videographerStandardWorkHours: 8, videographerOvertimeRate: 150 
+    };
+
+    const CATEGORIES = [
+        { id: 'stills', title: '📸 סטילס', cssClass: 'header-stills' },
+        { id: 'video', title: '🎥 וידאו', cssClass: 'header-video' },
+        { id: 'female', title: '👩 צלמת', cssClass: 'header-female' },
+        { id: 'deliverables', title: '📦 חבילה', cssClass: 'header-deliverables' },
+        { id: 'extras', title: '✨ תוספות', cssClass: 'header-extras' }
+    ];
+
+// --- אתחול (Init) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // טעינת הנתונים מהזיכרון
+        loadData();
+        
+        // מעבר למסך הבית כברירת מחדל
+        switchView('home'); 
+        
+        // --- תיקון: חיבור כפתור השמירה הראשי (שעל הבר) ---
+        const mainActionBtn = document.getElementById('mainActionBtn');
+        if(mainActionBtn) {
+            // שלב א': מחיקת הגדרות ישנות מה-HTML כדי למנוע התנגשויות
+            mainActionBtn.removeAttribute('onclick');
+            
+            // פונקציית השמירה ה"חכמה"
+            const performSave = function(e) {
+                // מונע התנהגות ברירת מחדל של הדפדפן (זום/גלילה בטעות)
+                if(e) e.preventDefault();
+                
+                // בדיקה: האם אנחנו במסך "הצעות מחיר"?
+                if(document.getElementById('quoteView').classList.contains('active')) {
+                    
+                    // שלב ב': סגירת המקלדת ב"כוח" (כדי שהשם שכתבת ייקלט)
+                    if (document.activeElement && document.activeElement.blur) {
+                        document.activeElement.blur();
+                    }
+                    
+                    // שלב ג': ביצוע השמירה בדיליי קטנטן (50 מילישניות) לוודא שהנתונים התעדכנו
+                    setTimeout(() => {
+                        saveCurrentQuote();
+                    }, 50);
+                }
+            };
+
+            // שלב ד': האזנה גם ל"קליק" רגיל וגם ל"נגיעה" במסך (למובייל)
+            mainActionBtn.addEventListener('click', performSave);
+            mainActionBtn.addEventListener('touchend', performSave);
+        }
+
+        // חיבור הכפתור הרגיל למטה (שכבר עובד תקין)
+        const saveBtn = document.getElementById('saveQuoteBtn');
+        if(saveBtn) saveBtn.onclick = saveCurrentQuote;
+    });
+
+    // --- הפונקציה המתוקנת לטעינת נתונים ---
+    function loadData() {
+        try {
+            // טעינת שירותים
+            const s = localStorage.getItem('serviceItemsConfiguration');
+            serviceItems = s ? JSON.parse(s) : [];
+            
+            // טעינת הגדרות אפליקציה
+            const a = localStorage.getItem('appSettings');
+            appSettings = a ? JSON.parse(a) : {};
+            
+            // טעינת הגדרות שכר (התיקון כאן)
+            const c = localStorage.getItem('calculationSettings');
+            if(c) {
+                calculationSettings = JSON.parse(c);
+                
+                // מילוי השדות בערכים שנשמרו - התיקון שהיה חסר
+                if(document.getElementById('photographerStandardWorkHours')) 
+                    document.getElementById('photographerStandardWorkHours').value = calculationSettings.photographerStandardWorkHours || '';
+                
+                if(document.getElementById('photographerOvertimeRate')) 
+                    document.getElementById('photographerOvertimeRate').value = calculationSettings.photographerOvertimeRate || '';
+                
+                if(document.getElementById('videographerStandardWorkHours')) 
+                    document.getElementById('videographerStandardWorkHours').value = calculationSettings.videographerStandardWorkHours || '';
+                
+                if(document.getElementById('videographerOvertimeRate')) 
+                    document.getElementById('videographerOvertimeRate').value = calculationSettings.videographerOvertimeRate || '';
+            }
+            
+            // עדכון כותרות ושדות הגדרות כלליות
+            if(appSettings.welcomeTitle) document.getElementById('welcomeTitle').innerText = appSettings.welcomeTitle;
+            else if(appSettings.businessName) document.getElementById('welcomeTitle').innerText = "היי, " + appSettings.businessName;
+            
+            if(appSettings.logoDataUrl) document.getElementById('printedLogo').src = appSettings.logoDataUrl;
+
+            // מילוי שדות הגדרות עסק
+            if(appSettings.businessName) document.getElementById('businessNameInput').value = appSettings.businessName;
+            if(appSettings.businessPhone) document.getElementById('businessPhoneInput').value = appSettings.businessPhone;
+            if(appSettings.businessEmail) document.getElementById('businessEmailInput').value = appSettings.businessEmail;
+            if(appSettings.welcomeTitle) document.getElementById('welcomeTitleInput').value = appSettings.welcomeTitle;
+            if(appSettings.whatsappCustomText) document.getElementById('whatsappCustomTextInput').value = appSettings.whatsappCustomText;
+            if(appSettings.docHeaderText) document.getElementById('docHeaderText').value = appSettings.docHeaderText;
+            if(appSettings.footerNoteText) document.getElementById('footerNoteTextarea').value = appSettings.footerNoteText;
+            if(appSettings.telegramBotToken) document.getElementById('telegramTokenInput').value = appSettings.telegramBotToken;
+            if(appSettings.telegramChatId) document.getElementById('telegramChatIdInput').value = appSettings.telegramChatId;
+
+        } catch(e) { console.error("Error loading data", e); }
+    }
+
+    // --- ניווט בין מסכים ---
+    window.switchView = function(view) {
+        document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
+        const mainBtn = document.getElementById('mainActionBtn');
+        if(mainBtn) mainBtn.style.display = 'flex';
+
+        if(view === 'home') {
+            document.getElementById('homeView').classList.add('active');
+            if(mainBtn) mainBtn.style.display = 'none'; 
+            renderClientsGrid();
+        } else if(view === 'quote') {
+            document.getElementById('quoteView').classList.add('active');
+            if(!editingQuoteId) resetQuoteForm(); 
+            renderServices();
+        } else if(view === 'tasks') {
+            document.getElementById('tasksView').classList.add('active');
+            if(mainBtn) mainBtn.style.display = 'none';
+            renderGlobalTasks();
+        }
+    };
+
+    window.handleMainAction = function() {
+        if(document.getElementById('quoteView').classList.contains('active')) saveCurrentQuote();
+    };
+
+    // --- לוגיקת לקוחות ---
+    window.setClientFilter = function(status) {
+        currentClientFilter = status;
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        if(status === 'all') document.getElementById('filterAllBtn').classList.add('active');
+        if(status === 'open') document.getElementById('filterOpenBtn').classList.add('active');
+        if(status === 'closed') document.getElementById('filterClosedBtn').classList.add('active');
+        renderClientsGrid();
+    };
+
+   function renderClientsGrid() {
+        const container = document.getElementById('clientsGrid');
+        if(!container) return;
+        container.innerHTML = '';
+        
+        const rawSearch = document.getElementById('clientSearchInput').value.toLowerCase().trim();
+        const cleanSearch = rawSearch.replace(/-/g, ''); 
+
+        let quotes = getSavedQuotes();
+        
+        // מיון לפי תאריך
+        const now = new Date(); now.setHours(0,0,0,0);
+        quotes.sort((a,b) => {
+            const dA = a.eventDate ? new Date(a.eventDate) : new Date(0);
+            const dB = b.eventDate ? new Date(b.eventDate) : new Date(0);
+            // אם שניהם עתידיים - הקרוב קודם. אם שניהם עבר - החדש קודם.
+            const isFutureA = dA >= now;
+            const isFutureB = dB >= now;
+            if (isFutureA && isFutureB) return dA - dB; 
+            if (!isFutureA && !isFutureB) return dB - dA;
+            if (isFutureA) return -1;
+            return 1;
+        });
+
+        let found = false;
+        quotes.forEach(q => {
+            // --- לוגיקת סינון מתקדמת לארכיון ---
+            const isArchived = q.isArchived === true;
+
+            // אם אנחנו בארכיון - מציגים *רק* ארכיון
+            if (currentClientFilter === 'archive') {
+                if (!isArchived) return;
+            } 
+            // אם אנחנו בכל מצב אחר (הכל/פתוח/סגור) - *מסתירים* את הארכיון
+            else {
+                if (isArchived) return; 
+                
+                // סינונים רגילים (רק למה שלא בארכיון)
+                if (currentClientFilter === 'open' && q.isClosed) return;
+                if (currentClientFilter === 'closed' && !q.isClosed) return;
+            }
+
+            // --- חיפוש ---
+            if(rawSearch) {
+                const name = (q.clientName || '').toLowerCase();
+                const venue = (q.venueName || '').toLowerCase();
+                const date = (q.eventDate || '');
+                const p1 = (q.clientPhone || '').replace(/\D/g, ''); 
+                const p2 = (q.clientPhone2 || '').replace(/\D/g, ''); 
+                
+                if (!name.includes(rawSearch) && !venue.includes(rawSearch) && !date.includes(rawSearch) && !p1.includes(cleanSearch) && !p2.includes(cleanSearch)) {
+                    return; 
+                }
+            }
+            
+            found = true;
+            const div = document.createElement('div');
+            // עיצוב שונה אם זה ארכיון
+            div.className = `client-block ${q.isClosed ? 'closed' : ''}`;
+            if(isArchived) div.style.opacity = "0.8"; // קצת שקוף בארכיון
+            
+            // כפתור הארכיון החדש (מוצג רק אם זה לא בארכיון, או כפתור שחזור אם זה כן)
+            const archiveBtnHtml = isArchived 
+                ? `<div class="action-icon-wrapper" onclick="unarchiveQuote('${q.id}')"><button class="mini-circle-btn btn-col-blue"><i class="fa-solid fa-box-open"></i></button><span class="action-text">שחזר</span></div>`
+                : `<div class="action-icon-wrapper" onclick="moveToArchive('${q.id}')"><button class="mini-circle-btn" style="color:#d97706;"><i class="fa-solid fa-box-archive"></i></button><span class="action-text">ארכיון</span></div>`;
+
+            div.innerHTML = `
+                <div class="client-header-compact" onclick="loadQuote('${q.id}')">
+                    <div class="client-name-bold">${q.clientName} ${isArchived ? '<span style="font-size:0.7em; color:#d97706;">(ארכיון)</span>' : ''}</div>
+                    <div class="client-info-row">
+                         <span>${q.eventDate || '-'}</span>
+                         <span>•</span>
+                         <span>${q.venueName || '-'}</span>
+                         ${q.isClosed ? '<i class="fa-solid fa-check" style="color:#10b981"></i>' : ''}
+                    </div>
+                </div>
+                <div class="client-actions-row">
+                    <div class="action-icon-wrapper" onclick="toggleStatus('${q.id}')">
+                        <button class="mini-circle-btn ${q.isClosed ? 'btn-col-green' : 'btn-col-gray'}">
+                            <i class="fa-solid ${q.isClosed ? 'fa-lock' : 'fa-lock-open'}"></i>
+                        </button>
+                        <span class="action-text">${q.isClosed ? 'סגור' : 'פתוח'}</span>
+                    </div>
+                    <div class="action-icon-wrapper" onclick="openSchedule('${q.id}')">
+                        <button class="mini-circle-btn btn-col-purple"><i class="fa-solid fa-clock"></i></button>
+                        <span class="action-text">זמנים</span>
+                    </div>
+                    <div class="action-icon-wrapper" onclick="addQuoteToCalendar('${q.id}')">
+                        <button class="mini-circle-btn btn-col-blue"><i class="fa-regular fa-calendar-plus"></i></button>
+                        <span class="action-text">יומן</span>
+                    </div>
+                    <div class="action-icon-wrapper" onclick="sendQuoteToWhatsapp('${q.id}')">
+                        <button class="mini-circle-btn btn-col-wa"><i class="fa-brands fa-whatsapp"></i></button>
+                        <span class="action-text">ווצאפ</span>
+                    </div>
+                    <div class="action-icon-wrapper" onclick="openWage('${q.id}')">
+                        <button class="mini-circle-btn btn-col-dark"><i class="fa-solid fa-shekel-sign"></i></button>
+                        <span class="action-text">שכר</span>
+                    </div>
+                    <div class="action-icon-wrapper" onclick="openTasks('${q.id}', '${q.clientName}')">
+                        <button class="mini-circle-btn btn-col-gray"><i class="fa-solid fa-list-check"></i></button>
+                        <span class="action-text">משימות</span>
+                    </div>
+                    
+                    ${archiveBtnHtml}
+
+                    <div class="action-icon-wrapper" onclick="deleteQuote('${q.id}')">
+                        <button class="mini-circle-btn btn-col-red"><i class="fa-solid fa-trash"></i></button>
+                        <span class="action-text">מחק</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        if(!found) {
+             const msg = currentClientFilter === 'archive' ? 'הארכיון ריק' : 'לא נמצאו תוצאות';
+             container.innerHTML = `<div style="text-align:center; padding:20px; color:#999;">${msg}</div>`;
+        }
+    }
+    // --- ייצוא לתמונה ---
+    function generatePrintHtmlContent() {
+        const client = document.getElementById('clientName').value;
+        const phone = document.getElementById('clientPhone').value;
+        const phone2 = document.getElementById('clientPhone2').value;
+        const email = document.getElementById('clientEmail').value;
+        const date = document.getElementById('eventDate').value;
+        const hebrewDate = document.getElementById('hebrewDateBox').innerText;
+        const venue = document.getElementById('venueName').value;
+        const notes = document.getElementById('quoteNotes').value;
+        const total = document.getElementById('finalTotalCost').innerText;
+        
+        const logo = appSettings.logoDataUrl ? `<img src="${appSettings.logoDataUrl}" style="max-height:100px; display:block; margin: 0 auto 20px auto;">` : '';
+        const bizName = appSettings.businessName || '';
+        const footerText = appSettings.footerNoteText || 'תודה שבחרתם בנו!';
+        const headerText = appSettings.docHeaderText || '';
+
+        let servicesHtml = '';
+        serviceItems.filter(i => i.selected).forEach(i => {
+            const totalItemPrice = i.price * i.quantity;
+            const priceDisplay = totalItemPrice > 0 ? `<div style="font-weight:bold;">${formatCurrency(totalItemPrice)} ₪</div>` : '';
+
+            servicesHtml += `
+            <div style="display:flex; justify-content:space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee;">
+                <div style="font-weight:bold; font-size:1.1em;">${i.name} <span style="font-size:0.8em; font-weight:normal;">(x${i.quantity})</span></div>
+                ${priceDisplay}
+            </div>`;
+        });
+        if (!servicesHtml) servicesHtml = '<div style="text-align:center; padding:20px;">לא נבחרו שירותים</div>';
+
+        let phonesDisplay = phone;
+        if(phone2) phonesDisplay += ` | ${phone2}`;
+
+        return `
+        <div dir="rtl" style="font-family:'Rubik', sans-serif; padding:40px; color:#333; background:white; min-height:1000px;">
+            <div style="text-align:center; margin-bottom: 30px; border-bottom: 2px solid #3b82f6; padding-bottom: 20px;">
+                ${logo}
+                <h2 style="margin: 10px 0 5px 0; color: #1e293b; font-size: 1.8em;">${bizName}</h2>
+                <div style="font-size:0.9em; color:#666;">${appSettings.businessPhone || ''} | ${appSettings.businessEmail || ''}</div>
+                <div style="font-size:0.9em; margin-top:5px;">${headerText}</div>
+            </div>
+
+            <h1 style="text-align: center; font-size: 1.6em; color: #3b82f6; margin-bottom: 30px; text-decoration: underline; text-underline-offset: 8px;">הצעת מחיר</h1>
+
+            <div style="background: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px; display: flex; gap: 20px;">
+                <div style="flex: 1; line-height: 1.8;">
+                    <strong>לכבוד:</strong> ${client}<br>
+                    <strong>טלפון:</strong> ${phonesDisplay}<br>
+                    <strong>מייל:</strong> ${email}
+                </div>
+                <div style="flex: 1; line-height: 1.8; border-right: 1px dashed #cbd5e1; padding-right: 20px;">
+                    <strong>תאריך:</strong> ${date}<br>
+                    <strong>תאריך עברי:</strong> ${hebrewDate}<br>
+                    <strong>מיקום:</strong> ${venue}
+                </div>
+            </div>
+
+            <div style="font-size: 1.2em; font-weight: bold; color: #1e293b; margin-bottom: 15px; border-right: 4px solid #3b82f6; padding-right: 10px;">פירוט השירותים</div>
+            <div style="margin-bottom: 20px;">${servicesHtml}</div>
+
+            ${notes ? `<div style="font-size: 1.2em; font-weight: bold; color: #1e293b; margin-bottom: 15px; border-right: 4px solid #3b82f6; padding-right: 10px;">הערות</div><div style="background:#fff7ed; padding:15px; border-radius:8px; border:1px solid #ffedd5;">${notes}</div>` : ''}
+
+            <div style="background: #1e293b; color: white; padding: 20px; text-align: center; font-size: 1.8em; font-weight: bold; margin-top: 40px; border-radius: 12px;">
+                סה"כ : ${total}
+            </div>
+
+            <div style="text-align: center; margin-top: 50px; color: #64748b; font-size: 0.9em; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                ${footerText}
+            </div>
+        </div>`;
+    }
+
+    document.getElementById('exportToImageBtn').onclick = () => {
+        const element = document.createElement('div');
+        element.innerHTML = generatePrintHtmlContent();
+        element.style.width = '794px'; 
+        element.style.minHeight = '1123px'; 
+        element.style.padding = '60px'; 
+        element.style.backgroundColor = 'white';
+        element.style.boxSizing = 'border-box';
+        element.style.position = 'fixed';
+        element.style.top = '0';
+        element.style.left = '-10000px'; 
+        document.body.appendChild(element);
+        
+        setTimeout(() => {
+            html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff', allowTaint: true }).then(canvas => {
+                const link = document.createElement('a');
+                const clientName = document.getElementById('clientName').value || 'Quote';
+                const dateStr = new Date().toISOString().slice(0,10);
+                link.download = `הצעת_מחיר_${clientName}_${dateStr}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+                document.body.removeChild(element);
+                showFeedback("תמונה נוצרה בהצלחה! 🖼️");
+            }).catch(err => {
+                console.error(err);
+                document.body.removeChild(element);
+                showFeedback("שגיאה ביצירת תמונה", "error");
+            });
+        }, 300); 
+    };
+
+    document.getElementById('convertToPdfBtn').onclick = () => {
+        const element = document.createElement('div');
+        element.innerHTML = generatePrintHtmlContent();
+        element.style.width = '800px'; 
+        document.body.appendChild(element);
+        const opt = { margin: 0, filename: `Quote.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save().then(() => document.body.removeChild(element));
+    };
+
+    // --- CRUD ---
+    window.toggleStatus = (id) => { let quotes = getSavedQuotes(); const idx = quotes.findIndex(x => x.id == id); if(idx > -1) { quotes[idx].isClosed = !quotes[idx].isClosed; localStorage.setItem('savedQuotes', JSON.stringify(quotes)); renderClientsGrid(); sendTelegramBackup(); }};
+    window.deleteQuote = (id) => { if(confirm("למחוק לצמיתות?")) { let quotes = getSavedQuotes(); quotes = quotes.filter(x => x.id != id); localStorage.setItem('savedQuotes', JSON.stringify(quotes)); renderClientsGrid(); sendTelegramBackup(); }};
+    // --- ניהול ארכיון ---
+    window.setClientFilter = function(status) {
+        currentClientFilter = status;
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        
+        if(status === 'all') document.getElementById('filterAllBtn').classList.add('active');
+        if(status === 'open') document.getElementById('filterOpenBtn').classList.add('active');
+        if(status === 'closed') document.getElementById('filterClosedBtn').classList.add('active');
+        if(status === 'archive') document.getElementById('filterArchiveBtn').classList.add('active'); // כפתור ארכיון פעיל
+        
+        renderClientsGrid();
+    };
+
+    window.moveToArchive = function(id) {
+        if(confirm("להעביר את הלקוח לארכיון?\nהוא ייעלם מהרשימה הראשית ויופיע רק בלשונית ארכיון.")) {
+            let quotes = getSavedQuotes();
+            const idx = quotes.findIndex(x => x.id == id);
+            if(idx > -1) {
+                quotes[idx].isArchived = true; // סימון כארכיון
+                localStorage.setItem('savedQuotes', JSON.stringify(quotes));
+                renderClientsGrid();
+                showFeedback("הועבר לארכיון 📦");
+                sendTelegramBackup();
+            }
+        }
+    };
+
+    window.unarchiveQuote = function(id) {
+        if(confirm("להחזיר את הלקוח לרשימה הפעילה?")) {
+            let quotes = getSavedQuotes();
+            const idx = quotes.findIndex(x => x.id == id);
+            if(idx > -1) {
+                quotes[idx].isArchived = false; // ביטול ארכיון
+                localStorage.setItem('savedQuotes', JSON.stringify(quotes));
+                renderClientsGrid();
+                showFeedback("הוחזר לרשימה ✅");
+                sendTelegramBackup();
+            }
+        }
+    };
+    window.addQuoteToCalendar = (id) => { const q = getSavedQuotes().find(x => x.id == id); if(!q || !q.eventDate) return alert("חסר תאריך"); const d = new Date(q.eventDate).toISOString().replace(/-|:|\.\d\d\d/g, "").split("T")[0]; const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(q.clientName + " - חתונה")}&dates=${d}/${d}&details=${encodeURIComponent('פרטים באפליקציה')}&location=${encodeURIComponent(q.venueName || '')}`; window.open(url, '_blank'); };
+    
+    // Copy To Whatsapp
+    window.sendQuoteToWhatsapp = (id) => { 
+        const q = getSavedQuotes().find(x => x.id == id); 
+        if(!q || !q.clientPhone) return alert("חסר טלפון"); 
+        
+        let phone = q.clientPhone.replace(/\D/g, ''); 
+        if (phone.startsWith('0')) phone = '972' + phone.substring(1); 
+        
+        let total = 0; 
+        let servicesText = "";
+        
+        if (q.selectedServices) {
+            q.selectedServices.forEach(s => {
+                const itemTotal = s.price * s.quantity;
+                total += itemTotal;
+                const priceStr = itemTotal > 0 ? ` - ${formatCurrency(itemTotal)} ₪` : '';
+                servicesText += `%0A▫️ ${s.name} (x${s.quantity})${priceStr}`;
+            });
+        }
+
+        const customText = appSettings.whatsappCustomText ? appSettings.whatsappCustomText.replace(/\n/g, '%0A') : ''; 
+        const text = `*שלום ${q.clientName},*%0A%0Aהנה סיכום הצעת המחיר לחתונה:${servicesText}%0A%0A*סה"כ: ${formatCurrency(total)} ₪*%0A%0A${customText}`; 
+        
+        window.open(`https://wa.me/${phone}?text=${text}`, '_blank'); 
+    };
+
+    // --- Tasks Logic ---
+    window.toggleTaskGlobal = (qid, idx) => { let quotes = getSavedQuotes(); const q = quotes.find(x => x.id == qid); if(q && q.tasks[idx]) { q.tasks[idx].completed = !q.tasks[idx].completed; localStorage.setItem('savedQuotes', JSON.stringify(quotes)); renderGlobalTasks(); }};
+    window.openTasks = (id, name) => { currentQuoteIdForTasks = id; document.querySelector('#allTasksModal h2').textContent = `משימות: ${name}`; renderClientTasks(id); openModal('allTasksModal'); };
+    window.renderClientTasks = (id) => { const list = document.getElementById('clientTasksList'); list.innerHTML = ''; const q = getSavedQuotes().find(x => x.id == id); if(!q || !q.tasks) return; q.tasks.forEach((t, idx) => { list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;"><span style="${t.completed ? 'text-decoration:line-through; color:#aaa;':''}">${t.text}</span><button class="btn btn-danger btn-sm" onclick="deleteTask('${id}', ${idx}); renderClientTasks('${id}');">X</button></div>`; }); };
+    window.addClientTask = () => { const id = currentQuoteIdForTasks; const txt = document.getElementById('newClientTask').value; if(!txt) return; let quotes = getSavedQuotes(); const idx = quotes.findIndex(x => x.id == id); if(idx > -1) { if(!quotes[idx].tasks) quotes[idx].tasks = []; quotes[idx].tasks.push({text:txt, completed:false}); localStorage.setItem('savedQuotes', JSON.stringify(quotes)); document.getElementById('newClientTask').value = ''; renderClientTasks(id); renderGlobalTasks(); }};
+    window.deleteTask = (qid, taskIdx) => { let quotes = getSavedQuotes(); const idx = quotes.findIndex(x => x.id == qid); if(idx > -1) { quotes[idx].tasks.splice(taskIdx, 1); localStorage.setItem('savedQuotes', JSON.stringify(quotes)); if(document.getElementById('allTasksModal').style.display === 'block') renderClientTasks(qid); renderGlobalTasks(); }};
+    window.renderGlobalTasks = function() {
+        const container = document.getElementById('globalTasksContainer');
+        container.innerHTML = '';
+        let quotes = getSavedQuotes();
+        quotes.sort((a,b) => new Date(a.eventDate || '2099') - new Date(b.eventDate || '2099'));
+        let hasTasks = false;
+        quotes.forEach(q => {
+            if (!q.tasks || q.tasks.length === 0) return;
+            hasTasks = true;
+            const group = document.createElement('div');
+            group.className = 'task-client-group';
+            let listHtml = '';
+            q.tasks.forEach((t, idx) => {
+                const isDone = t.completed;
+                listHtml += `<div class="task-row-clean"><div class="task-text-clean ${isDone ? 'done' : ''}">${t.text}</div><div class="task-actions-clean"><button class="task-icon-btn check" onclick="toggleTaskGlobal('${q.id}', ${idx})"><i class="fa-solid ${isDone ? 'fa-rotate-left' : 'fa-check'}"></i></button></div></div>`;
+            });
+            group.innerHTML = `<div class="task-client-header"><div class="task-client-name">${q.clientName}</div><div class="task-client-date">${q.eventDate || ''}</div></div>${listHtml}<div class="add-task-link" onclick="openTasks('${q.id}', '${q.clientName}')">+ הוסף / ערוך משימות</div>`;
+            container.appendChild(group);
+        });
+        if(!hasTasks) container.innerHTML = '<div style="text-align:center; padding:30px; color:#a0aec0;">אין משימות פתוחות</div>';
+    };
+
+    // --- חישוב שכר בזמן אמת ---
+    window.calculateRealTimeWage = function() {
+        const toTime = (dec) => {
+            const h = Math.floor(dec);
+            const m = Math.round((dec - h) * 60);
+            return `${h}:${m.toString().padStart(2, '0')}`;
+        };
+
+        const calc = (s, e, standardHours, rate) => {
+            if(!s || !e) return null;
+            let d1 = new Date("1970-01-01T" + s);
+            let d2 = new Date("1970-01-01T" + e);
+            if(d2 < d1) d2.setDate(d2.getDate() + 1);
+            
+            const diffMs = d2 - d1;
+            const hoursDecimal = diffMs / 1000 / 60 / 60;
+            const extraDecimal = Math.max(0, hoursDecimal - standardHours);
+            const extraCost = Math.round(extraDecimal * rate);
+            
+            return { 
+                hoursDisplay: toTime(hoursDecimal),
+                extraDisplay: toTime(extraDecimal),
+                extraCost: extraCost 
+            };
+        };
+
+        const pStart = document.getElementById('wagePStart').value;
+        const pEnd = document.getElementById('wagePEnd').value;
+        const pResDiv = document.getElementById('pWageResult');
+        const pData = calc(pStart, pEnd, calculationSettings.photographerStandardWorkHours, calculationSettings.photographerOvertimeRate);
+
+        if(pData) {
+            let html = `סה"כ: <strong>${pData.hoursDisplay}</strong>`;
+            if(pData.extraCost > 0) html += ` | <span class="text-red">תוספת: ${pData.extraCost} ₪</span> <span class="text-gray">(${pData.extraDisplay} שעות)</span>`;
+            pResDiv.innerHTML = html; pResDiv.classList.add('visible');
+        } else { pResDiv.classList.remove('visible'); }
+
+        const vStart = document.getElementById('wageVStart').value;
+        const vEnd = document.getElementById('wageVEnd').value;
+        const vResDiv = document.getElementById('vWageResult');
+        const vData = calc(vStart, vEnd, calculationSettings.videographerStandardWorkHours, calculationSettings.videographerOvertimeRate);
+
+        if(vData) {
+            let html = `סה"כ: <strong>${vData.hoursDisplay}</strong>`;
+            if(vData.extraCost > 0) html += ` | <span class="text-red">תוספת: ${vData.extraCost} ₪</span> <span class="text-gray">(${vData.extraDisplay} שעות)</span>`;
+            vResDiv.innerHTML = html; vResDiv.classList.add('visible');
+        } else { vResDiv.classList.remove('visible'); }
+    };
+
+    window.openWage = (id) => { if(!id) return; const q = getSavedQuotes().find(x => x.id == id); document.getElementById('currentQuoteIdForWage').value = id; const w = q.wageDetails || {}; document.getElementById('wagePStart').value = w.photographerStartTime || ''; document.getElementById('wagePEnd').value = w.photographerEndTime || ''; document.getElementById('wageVStart').value = w.videographerStartTime || ''; document.getElementById('wageVEnd').value = w.videographerEndTime || ''; document.getElementById('wageExtras').value = w.extrasCost || 0; document.getElementById('signatoryName').value = w.signatoryName || ''; document.getElementById('wagePaidNow').value = w.paymentMain || 0; document.getElementById('paymentGroomSide').value = w.paymentGroomSide || 0; document.getElementById('paymentBrideSide').value = w.paymentBrideSide || 0; document.getElementById('pWageResult').classList.remove('visible'); document.getElementById('vWageResult').classList.remove('visible'); calculateRealTimeWage(); if(w.signatureImage) { document.getElementById('savedSigImg').src = w.signatureImage; document.getElementById('savedSigImg').style.display = 'block'; currentSigData = w.signatureImage; } else { document.getElementById('savedSigImg').style.display = 'none'; currentSigData = null; } openModal('eventWageModal'); };
+    window.saveWageData = () => { const id = document.getElementById('currentQuoteIdForWage').value; let quotes = getSavedQuotes(); const idx = quotes.findIndex(x => x.id == id); if(idx > -1) { const calc = (s, e, std, rate) => { if(!s || !e) return { hours: 0, cost: 0 }; let d1 = new Date("1970-01-01T" + s); let d2 = new Date("1970-01-01T" + e); if(d2 < d1) d2.setDate(d2.getDate() + 1); const hours = (d2 - d1) / 36e5; const extra = Math.max(0, hours - std); return { hours: hours.toFixed(2), cost: Math.round(extra * rate) }; }; const p = calc(document.getElementById('wagePStart').value, document.getElementById('wagePEnd').value, calculationSettings.photographerStandardWorkHours, calculationSettings.photographerOvertimeRate); const v = calc(document.getElementById('wageVStart').value, document.getElementById('wageVEnd').value, calculationSettings.videographerStandardWorkHours, calculationSettings.videographerOvertimeRate); const w = { photographerStartTime: document.getElementById('wagePStart').value, photographerEndTime: document.getElementById('wagePEnd').value, photographerTotalHours: p.hours, photographerOvertimeCost: p.cost, videographerStartTime: document.getElementById('wageVStart').value, videographerEndTime: document.getElementById('wageVEnd').value, videographerTotalHours: v.hours, videographerOvertimeCost: v.cost, extrasCost: document.getElementById('wageExtras').value, signatoryName: document.getElementById('signatoryName').value, paymentMain: document.getElementById('wagePaidNow').value, paymentGroomSide: document.getElementById('paymentGroomSide').value, paymentBrideSide: document.getElementById('paymentBrideSide').value, signatureImage: currentSigData }; quotes[idx].wageDetails = w; quotes[idx].isClosed = true; localStorage.setItem('savedQuotes', JSON.stringify(quotes)); if(editingQuoteId == id) loadQuote(id); closeModal('eventWageModal'); showFeedback("אירוע נסגר והנתונים נשמרו!"); sendTelegramBackup(); if(document.getElementById('homeView').classList.contains('active')) renderClientsGrid(); } };
+    
+    // Core Load/Save
+    function getSavedQuotes() { return JSON.parse(localStorage.getItem('savedQuotes')) || []; }
+    function resetQuoteForm() { editingQuoteId = null; currentlyLoadedQuoteData = null; document.querySelectorAll('#quoteView input, #quoteView textarea').forEach(i => i.value = ''); document.getElementById('amountPaid').value = 0; serviceItems.forEach(i => { i.selected = false; i.quantity = 1; }); document.getElementById('dashboardScheduleSection').style.display = 'none'; document.getElementById('hebrewDateBox').innerText = "--"; }
+    function loadQuote(id) { const q = getSavedQuotes().find(x => x.id == id); if(!q) return; editingQuoteId = q.id; currentlyLoadedQuoteData = q; document.getElementById('clientName').value = q.clientName || ''; document.getElementById('clientPhone').value = q.clientPhone || ''; document.getElementById('clientPhone2').value = q.clientPhone2 || ''; document.getElementById('clientEmail').value = q.clientEmail || ''; document.getElementById('eventDate').value = q.eventDate || ''; if(q.eventDate) updateHebrewDate(); document.getElementById('venueName').value = q.venueName || ''; document.getElementById('quoteNotes').value = q.notes || ''; document.getElementById('amountPaid').value = q.amountPaid || 0; const t = q.teamDetails || {}; document.getElementById('photographerName').value = t.photographerName || ''; document.getElementById('photographerCost').value = t.photographerCost || 0; document.getElementById('videographerName').value = t.videographerName || ''; document.getElementById('videographerCost').value = t.videographerCost || 0; document.getElementById('femalePhotographerName').value = t.femalePhotographerName || ''; document.getElementById('femalePhotographerCost').value = t.femalePhotographerCost || 0; serviceItems.forEach(i => { const saved = q.selectedServices?.find(s => s.id === i.id || s.name === i.name); if(saved) { i.selected = true; i.quantity = saved.quantity; } else { i.selected = false; i.quantity = 1; } }); const s = q.scheduleDetails || {}; if(s.startTime || s.chuppahTime) { document.getElementById('dashboardScheduleSection').style.display = 'block'; document.getElementById('dashChuppahTime').textContent = s.chuppahTime || '-'; document.getElementById('dashStartTime').textContent = s.startTime || '-'; document.getElementById('dashFamilies').textContent = `${s.brideFamily||''} / ${s.groomFamily||''}`; } else { document.getElementById('dashboardScheduleSection').style.display = 'none'; } const w = q.wageDetails || {}; const wageDiv = document.getElementById('wageSummaryContainer'); if(q.isClosed) { wageDiv.style.display = 'block'; const totalExtras = (parseFloat(w.photographerOvertimeCost)||0) + (parseFloat(w.videographerOvertimeCost)||0) + (parseFloat(w.extrasCost)||0); wageDiv.innerHTML = `<strong>אירוע סגור</strong><br>חריגות ותוספות: ${totalExtras} ₪<br>שולם באירוע: ${w.paymentMain || 0} ₪ (חתן: ${w.paymentGroomSide||0}, כלה: ${w.paymentBrideSide||0})`; } else { wageDiv.style.display = 'none'; } renderServices(); updateSummary(); switchView('quote'); }
+    function saveCurrentQuote() { const client = document.getElementById('clientName').value; if(!client) { showFeedback("חסר שם לקוח", "error"); return; } const q = { id: editingQuoteId || Date.now().toString(), clientName: client, clientPhone: document.getElementById('clientPhone').value, clientPhone2: document.getElementById('clientPhone2').value, clientEmail: document.getElementById('clientEmail').value, eventDate: document.getElementById('eventDate').value, venueName: document.getElementById('venueName').value, notes: document.getElementById('quoteNotes').value, amountPaid: document.getElementById('amountPaid').value, teamDetails: { photographerName: document.getElementById('photographerName').value, photographerCost: document.getElementById('photographerCost').value, videographerName: document.getElementById('videographerName').value, videographerCost: document.getElementById('videographerCost').value, femalePhotographerName: document.getElementById('femalePhotographerName').value, femalePhotographerCost: document.getElementById('femalePhotographerCost').value }, selectedServices: serviceItems.filter(i => i.selected), scheduleDetails: currentlyLoadedQuoteData?.scheduleDetails || {}, wageDetails: currentlyLoadedQuoteData?.wageDetails || {}, tasks: currentlyLoadedQuoteData?.tasks || [], isClosed: currentlyLoadedQuoteData?.isClosed || false }; let quotes = getSavedQuotes(); if(editingQuoteId) { const idx = quotes.findIndex(x => x.id == editingQuoteId); if(idx > -1) quotes[idx] = q; else quotes.push(q); } else quotes.push(q); localStorage.setItem('savedQuotes', JSON.stringify(quotes)); editingQuoteId = q.id; currentlyLoadedQuoteData = q; showFeedback("נשמר!"); sendTelegramBackup(); }
+    
+    // Copy
+    document.getElementById('copyToClipboardBtn').onclick = function() { 
+        const client = document.getElementById('clientName').value; 
+        if (!client) { showFeedback("יש להזין שם לקוח", "error"); return; } 
+        const eventDate = document.getElementById('eventDate').value || 'תאריך לא נקבע'; 
+        const hebrewDate = document.getElementById('hebrewDateBox').innerText; 
+        const venue = document.getElementById('venueName').value || 'טרם נקבע מיקום'; 
+        const total = document.getElementById('finalTotalCost').innerText; 
+        const businessName = appSettings.businessName || 'העסק שלנו'; 
+        const dateDisplay = (hebrewDate && hebrewDate !== '--') ? `${eventDate} (${hebrewDate})` : eventDate; 
+        
+        let servicesListText = ""; 
+        const selected = serviceItems.filter(i => i.selected); 
+        
+        if (selected.length > 0) { 
+            selected.forEach(item => { 
+                const totalItemPrice = item.price * item.quantity;
+                const priceStr = totalItemPrice > 0 ? ` - ${formatCurrency(totalItemPrice)} ₪` : '';
+                servicesListText += `▫️ ${item.name} (x${item.quantity})${priceStr}\n`; 
+            }); 
+        } else { 
+            servicesListText = "▫️ לא נבחרו שירותים\n"; 
+        } 
+        
+        const paid = parseFloat(document.getElementById('amountPaid').value) || 0; 
+        const balance = document.getElementById('balanceDue').innerText; 
+        let paymentStatus = ""; 
+        if (paid > 0) { 
+            paymentStatus = `\nשולם עד כה: ${formatCurrency(paid)} ₪\nיתרה לתשלום: *${balance} ₪*`; 
+        } 
+        
+        const textToCopy = `*הצעת מחיר עבור ${client}*\nתאריך: ${dateDisplay}\nמיקום: ${venue}\n\n*פירוט השירותים:*\n${servicesListText}\n------------------\n*סה"כ : ${total} ₪*${paymentStatus}\n\nבברכה,\n${businessName}`; 
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) { 
+            navigator.clipboard.writeText(textToCopy).then(() => showFeedback("הועתק! 📋")).catch(err => fallbackCopyTextToClipboard(textToCopy)); 
+        } else { 
+            fallbackCopyTextToClipboard(textToCopy); 
+        } 
+    };
+    function fallbackCopyTextToClipboard(text) { const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.top = "0"; textArea.style.left = "0"; textArea.style.position = "fixed"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); try { document.execCommand('copy') ? showFeedback("הועתק! 📋") : showFeedback("ההעתקה נכשלה", "error"); } catch (err) { showFeedback("שגיאה בהעתקה", "error"); } document.body.removeChild(textArea); }
+    
+    // Utils
+    function renderServices() { const container = document.getElementById('servicesContainer'); container.innerHTML = ''; CATEGORIES.forEach(cat => { const items = serviceItems.filter(i => i.category === cat.id); if(items.length === 0) return; const header = document.createElement('div'); header.className = `category-header ${cat.cssClass}`; header.textContent = cat.title; container.appendChild(header); items.forEach(item => { const div = document.createElement('div'); div.className = `service-item ${item.selected ? 'selected' : ''}`; div.innerHTML = `<div style="font-weight:600; font-size:0.9rem;">${item.name}</div><div style="color:#059669; font-weight:700;">${item.price} ₪</div><div class="qty-ctrl" onclick="event.stopPropagation()"><span onclick="if(${item.quantity}>1){this.nextElementSibling.innerText=--${item.quantity};updateSummary();}">-</span><span style="font-weight:bold;">${item.quantity}</span><span onclick="{this.previousElementSibling.innerText=++${item.quantity};updateSummary();}">+</span></div>`; div.onclick = () => { item.selected = !item.selected; renderServices(); updateSummary(); }; container.appendChild(div); }); }); }
+
+    // Summary
+    function updateSummary() {
+        const total = serviceItems.filter(i => i.selected).reduce((sum, i) => sum + (i.price * i.quantity), 0);
+        const totalCost = serviceItems.filter(i => i.selected).reduce((sum, i) => sum + ((i.internalCost || 0) * i.quantity), 0);
+        const deposit = parseFloat(document.getElementById('amountPaid').value) || 0;
+        let extras = 0;
+        let totalEventPayments = 0;
+
+        if(currentlyLoadedQuoteData && currentlyLoadedQuoteData.isClosed) {
+            const w = currentlyLoadedQuoteData.wageDetails || {};
+            extras = (parseFloat(w.photographerOvertimeCost)||0) + 
+                     (parseFloat(w.videographerOvertimeCost)||0) + 
+                     (parseFloat(w.extrasCost)||0);
+            const payMain = parseFloat(w.paymentMain) || 0;
+            const payGroom = parseFloat(w.paymentGroomSide) || 0;
+            const payBride = parseFloat(w.paymentBrideSide) || 0;
+            totalEventPayments = payMain + payGroom + payBride;
+        }
+        
+        const finalTotal = total + extras; 
+        const totalPaid = deposit + totalEventPayments; 
+        const profit = finalTotal - totalCost; 
+
+        document.getElementById('finalTotalCost').innerText = formatCurrency(finalTotal);
+        document.getElementById('balanceDue').innerText = formatCurrency(finalTotal - totalPaid);
+        document.getElementById('estimatedProfit').innerText = formatCurrency(profit);
+    }
+
+    window.openModal = (id) => document.getElementById(id).style.display = 'flex';
+    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+    window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('open');
+    function formatCurrency(n) { return parseFloat(n).toLocaleString('he-IL'); }
+    function showFeedback(msg, type='success') { const fb = document.getElementById('feedbackMessage'); fb.innerText = msg; fb.style.background = type === 'error' ? '#e11d48' : '#10b981'; fb.style.display = 'block'; setTimeout(() => fb.style.display = 'none', 3000); }
+    function sendTelegramBackup() { if(!appSettings.telegramBotToken || !appSettings.telegramChatId) return; const data = { savedQuotes: getSavedQuotes(), appSettings: appSettings, serviceItems: serviceItems }; const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}); const formData = new FormData(); formData.append('chat_id', appSettings.telegramChatId); formData.append('document', blob, 'backup.json'); fetch(`https://api.telegram.org/bot${appSettings.telegramBotToken}/sendDocument`, { method: 'POST', body: formData }); }
+    function updateHebrewDate() { const d = document.getElementById('eventDate').value; if(d) { const h = getHebrewDateDetails(d); document.getElementById('hebrewDateBox').innerText = `${h.weekday}, ${h.day} ב${h.month} ${h.year}`; } else { document.getElementById('hebrewDateBox').innerText = "--"; } }
+    function getHebrewGematria(num) { const letters = [{v:400,l:'ת'},{v:300,l:'ש'},{v:200,l:'ר'},{v:100,l:'ק'},{v:90,l:'צ'},{v:80,l:'פ'},{v:70,l:'ע'},{v:60,l:'ס'},{v:50,l:'נ'},{v:40,l:'מ'},{v:30,l:'ל'},{v:20,l:'כ'},{v:10,l:'י'},{v:9,l:'ט'},{v:8,l:'ח'},{v:7,l:'ז'},{v:6,l:'ו'},{v:5,l:'ה'},{v:4,l:'ד'},{v:3,l:'ג'},{v:2,l:'ב'},{v:1,l:'א'}]; let str = ""; if(num===15) return 'ט"ו'; if(num===16) return 'ט"ז'; for(let i=0; i<letters.length; i++) { while(num >= letters[i].v) { str += letters[i].l; num -= letters[i].v; } } return str.length > 1 ? str.slice(0,-1)+'"'+str.slice(-1) : str+"'"; }
+    function getHebrewDateDetails(dateStr) { const date = new Date(dateStr); const opts = { calendar: 'hebrew', day: 'numeric', month: 'long', year: 'numeric' }; const parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(date); let day=0, year=0, month=""; parts.forEach(p => { if(p.type==='day') day=parseInt(p.value); if(p.type==='year') year=parseInt(p.value.split(' ')[0]); if(p.type==='month') month=p.value; }); const monthMap = {"Tishri":"תשרי","Cheshvan":"חשוון","Kislev":"כסלו","Tevet":"טבת","Shevat":"שבט","Adar":"אדר","Adar I":"אדר א","Adar II":"אדר ב","Nisan":"ניסן","Iyar":"אייר","Sivan":"סיוון","Tamuz":"תמוז","Av":"אב","Elul":"אלול"}; return { day: getHebrewGematria(day), month: monthMap[month]||month, year: getHebrewGematria(year%1000), weekday: date.toLocaleDateString('he-IL',{weekday:'long'}) }; }
+    document.getElementById('eventDate').addEventListener('change', updateHebrewDate);
+    window.openDialer = (id) => location.href = `tel:${document.getElementById(id).value}`;
+    window.sendQuickWhatsapp = () => { const p = document.getElementById('clientPhone').value.replace(/\D/g,''); window.open(`https://wa.me/972${p.substring(1)}`, '_blank'); };
+    window.copyEmail = () => { navigator.clipboard.writeText(document.getElementById('clientEmail').value); showFeedback("הועתק"); };
+    window.formatTime = (input) => { let v = input.value.replace(/\D/g, ''); if(v.length >= 4) input.value = v.substring(0,2) + ':' + v.substring(2,4); };
+    window.openSettingsTab = (event, id) => { document.querySelectorAll('.settings-tab-content').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); };
+    
+    // --- שמירת הגדרות (תיקון) ---
+    window.saveSettings = () => { 
+        appSettings.businessName = document.getElementById('businessNameInput').value; 
+        appSettings.businessPhone = document.getElementById('businessPhoneInput').value; 
+        appSettings.businessEmail = document.getElementById('businessEmailInput').value; 
+        appSettings.welcomeTitle = document.getElementById('welcomeTitleInput').value; 
+        appSettings.whatsappCustomText = document.getElementById('whatsappCustomTextInput').value; 
+        appSettings.docHeaderText = document.getElementById('docHeaderText').value; 
+        appSettings.footerNoteText = document.getElementById('footerNoteTextarea').value; 
+        appSettings.telegramBotToken = document.getElementById('telegramTokenInput').value; 
+        appSettings.telegramChatId = document.getElementById('telegramChatIdInput').value; 
+        
+        localStorage.setItem('appSettings', JSON.stringify(appSettings)); 
+        
+        // עדכון מיידי של המסך
+        if(appSettings.businessName) document.getElementById('welcomeTitle').innerText = "היי, " + appSettings.businessName; 
+        if(appSettings.welcomeTitle) document.getElementById('welcomeTitle').innerText = appSettings.welcomeTitle; 
+        
+        closeModal('settingsModal'); 
+        showFeedback("הגדרות נשמרו"); 
+    };
+
+    // --- לוגו ---
+    document.getElementById('logoFileInput').addEventListener('change', function(e) { 
+        const file = e.target.files[0]; 
+        if (file) { 
+            const reader = new FileReader(); 
+            reader.onload = function(evt) { 
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const MAX_WIDTH = 300;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    appSettings.logoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                }
+                img.src = evt.target.result;
+            }; 
+            reader.readAsDataURL(file); 
+        } 
+    });
+    
+    document.getElementById('removeLogoBtn').onclick = () => { appSettings.logoDataUrl = ''; };
+    
+    // --- Service Management ---
+    function renderManagementList() {
+        const container = document.getElementById('priceSettings');
+        container.innerHTML = '';
+        if (serviceItems.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#999;">אין שירותים מוגדרים</div>';
+            return;
+        }
+        const sortedItems = [...serviceItems].sort((a,b) => a.category.localeCompare(b.category));
+        sortedItems.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'service-manage-row';
+            row.innerHTML = `
+                <select onchange="updateServiceItem('${item.id}', 'category', this.value)" style="width: 70px;">
+                    <option value="stills" ${item.category === 'stills' ? 'selected' : ''}>סטילס</option>
+                    <option value="video" ${item.category === 'video' ? 'selected' : ''}>וידאו</option>
+                    <option value="female" ${item.category === 'female' ? 'selected' : ''}>צלמת</option>
+                    <option value="deliverables" ${item.category === 'deliverables' ? 'selected' : ''}>חבילה</option>
+                    <option value="extras" ${item.category === 'extras' ? 'selected' : ''}>תוספות</option>
+                </select>
+                <input type="text" value="${item.name}" onchange="updateServiceItem('${item.id}', 'name', this.value)" style="flex:2;" placeholder="שם">
+                <div style="display:flex; flex-direction:column; width:60px;">
+                    <label style="font-size:0.7em; margin:0;">מחיר</label>
+                    <input type="number" value="${item.price}" onchange="updateServiceItem('${item.id}', 'price', this.value)">
+                </div>
+                <div style="display:flex; flex-direction:column; width:60px;">
+                    <label style="font-size:0.7em; margin:0;">עלות</label>
+                    <input type="number" value="${item.internalCost || 0}" onchange="updateServiceItem('${item.id}', 'internalCost', this.value)" style="background:#fff0f0;">
+                </div>
+                <button class="delete-svc-btn" onclick="deleteServiceItem('${item.id}')"><i class="fa-solid fa-trash"></i></button>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function updateServiceItem(id, field, value) {
+        const idx = serviceItems.findIndex(i => i.id === id);
+        if (idx > -1) {
+            serviceItems[idx][field] = (field === 'price' || field === 'internalCost') ? parseFloat(value) : value;
+            localStorage.setItem('serviceItemsConfiguration', JSON.stringify(serviceItems));
+            if(document.getElementById('quoteView').classList.contains('active')) { renderServices(); updateSummary(); }
+        }
+    }
+
+    function deleteServiceItem(id) {
+        if(confirm("למחוק את השירות הזה?")) {
+            serviceItems = serviceItems.filter(i => i.id !== id);
+            localStorage.setItem('serviceItemsConfiguration', JSON.stringify(serviceItems));
+            renderManagementList();
+            if(document.getElementById('quoteView').classList.contains('active')) { renderServices(); updateSummary(); }
+        }
+    }
+
+    function addNewService() {
+        const name = document.getElementById('newServiceName').value;
+        const price = parseFloat(document.getElementById('newServicePrice').value) || 0;
+        const cost = parseFloat(document.getElementById('newServiceInternalCost').value) || 0;
+        const cat = document.getElementById('newServiceCategory').value;
+        if(!name) return alert("חובה להזין שם שירות");
+        serviceItems.push({ 
+            id: 's_'+Date.now(), 
+            name, 
+            price, 
+            internalCost: cost, 
+            category: cat, 
+            quantity: 1, 
+            selected: false 
+        });
+        localStorage.setItem('serviceItemsConfiguration', JSON.stringify(serviceItems));
+        document.getElementById('newServiceName').value = '';
+        document.getElementById('newServicePrice').value = '';
+        document.getElementById('newServiceInternalCost').value = '';
+        renderManagementList();
+        if(document.getElementById('quoteView').classList.contains('active')) { renderServices(); }
+    }
+
+    function exportDataManual() { const data = { savedQuotes: getSavedQuotes(), appSettings: appSettings, serviceItems: serviceItems }; const blob = new Blob([JSON.stringify(data)], {type: 'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup.json'; a.click(); }
+    
+    // --- RESTORE FUNCTION ---
+    function restoreDataManual(input) {
+        const file = input.files[0];
+        if (!file) return;
+        if (!confirm("פעולה זו תדרוס את הנתונים הנוכחיים ותחליף אותם בנתונים מהגיבוי. האם להמשיך?")) { input.value = ''; return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.savedQuotes) localStorage.setItem('savedQuotes', JSON.stringify(data.savedQuotes));
+                if (data.appSettings) localStorage.setItem('appSettings', JSON.stringify(data.appSettings));
+                if (data.serviceItems) localStorage.setItem('serviceItemsConfiguration', JSON.stringify(data.serviceItems));
+                if (data.calculationSettings) localStorage.setItem('calculationSettings', JSON.stringify(data.calculationSettings));
+                alert("הנתונים שוחזרו בהצלחה! הדף יתרענן כעת.");
+                location.reload();
+            } catch (err) { console.error(err); alert("שגיאה בטעינת הקובץ. וודא שבחרת קובץ גיבוי (JSON) תקין."); }
+        };
+        reader.readAsText(file);
+    }
+
+    document.getElementById('resetAppBtn').onclick = () => { if(confirm("למחוק הכל?")) { localStorage.clear(); location.reload(); }};
+    document.getElementById('saveCalculationSettingsBtn').onclick = () => { calculationSettings.photographerStandardWorkHours = document.getElementById('photographerStandardWorkHours').value; calculationSettings.photographerOvertimeRate = document.getElementById('photographerOvertimeRate').value; calculationSettings.videographerStandardWorkHours = document.getElementById('videographerStandardWorkHours').value; calculationSettings.videographerOvertimeRate = document.getElementById('videographerOvertimeRate').value; localStorage.setItem('calculationSettings', JSON.stringify(calculationSettings)); closeModal('calculationSettingsModal'); };
+    window.openSchedule = (id) => { if(!id) { showFeedback("יש לשמור הצעה קודם", "error"); return; } const q = getSavedQuotes().find(x => x.id == id); if(!q) return; currentQuoteIdForSchedule = id; document.getElementById('scheduleQuoteId').value = id; document.getElementById('schedNameDisplay').textContent = q.clientName; document.getElementById('schedDateDisplay').textContent = q.eventDate || ''; const s = q.scheduleDetails || {}; document.getElementById('schedPhone1').value = q.clientPhone || ''; document.getElementById('schedPhone2').value = q.clientPhone2 || ''; document.getElementById('schedVenue').value = s.venueName || q.venueName || ''; document.getElementById('schedBrideFam').value = s.brideFamily || ''; document.getElementById('schedGroomFam').value = s.groomFamily || ''; document.getElementById('schedStart').value = s.startTime || ''; document.getElementById('schedReception').value = s.receptionTime || ''; document.getElementById('schedChuppah').value = s.chuppahTime || ''; document.getElementById('schedOutdoorSelect').value = s.outdoorPhotos || 'no'; toggleOutdoor(); document.getElementById('schedOutdoorLoc').value = s.outdoorLocation || ''; document.getElementById('schedGroomSib').value = s.groomSiblings || ''; document.getElementById('schedGroomMar').value = s.groomMarried || ''; document.getElementById('schedBrideSib').value = s.brideSiblings || ''; document.getElementById('schedBrideMar').value = s.brideMarried || ''; currentSelectedSector = s.sector; setSector(s.sector || ''); document.getElementById('schedHasidutName').value = s.hasidutName || ''; document.getElementById('schedNotes').value = s.notes || ''; openModal('scheduleModal'); };
+    window.saveScheduleData = () => { const id = document.getElementById('scheduleQuoteId').value; let quotes = getSavedQuotes(); const idx = quotes.findIndex(x => x.id == id); if(idx > -1) { const s = { venueName: document.getElementById('schedVenue').value, brideFamily: document.getElementById('schedBrideFam').value, groomFamily: document.getElementById('schedGroomFam').value, startTime: document.getElementById('schedStart').value, receptionTime: document.getElementById('schedReception').value, chuppahTime: document.getElementById('schedChuppah').value, outdoorPhotos: document.getElementById('schedOutdoorSelect').value, outdoorLocation: document.getElementById('schedOutdoorLoc').value, groomSiblings: document.getElementById('schedGroomSib').value, groomMarried: document.getElementById('schedGroomMar').value, brideSiblings: document.getElementById('schedBrideSib').value, brideMarried: document.getElementById('schedBrideMar').value, sector: currentSelectedSector, hasidutName: document.getElementById('schedHasidutName').value, notes: document.getElementById('schedNotes').value }; quotes[idx].scheduleDetails = s; if(s.venueName) quotes[idx].venueName = s.venueName; const p1 = document.getElementById('schedPhone1').value; if(p1) quotes[idx].clientPhone = p1; const p2 = document.getElementById('schedPhone2').value; if(p2) quotes[idx].clientPhone2 = p2; localStorage.setItem('savedQuotes', JSON.stringify(quotes)); if(editingQuoteId == id) { currentlyLoadedQuoteData = quotes[idx]; loadQuote(id); } closeModal('scheduleModal'); showFeedback("זמנים נשמרו!"); sendTelegramBackup(); } };
+    window.toggleOutdoor = () => { const v = document.getElementById('schedOutdoorSelect').value; document.getElementById('schedOutdoorWrapper').style.display = v === 'yes' ? 'block' : 'none'; };
+    window.setSector = (sec) => { currentSelectedSector = sec; ['secSephardic','secLitvish','secHasidic'].forEach(id => document.getElementById(id).classList.remove('active')); document.getElementById('schedHasidutWrapper').style.display = 'none'; if(sec === 'sephardic') document.getElementById('secSephardic').classList.add('active'); if(sec === 'litvish') document.getElementById('secLitvish').classList.add('active'); if(sec === 'hasidic') { document.getElementById('secHasidic').classList.add('active'); document.getElementById('schedHasidutWrapper').style.display = 'block'; } };
+    
+    // Canvas & Signature
+    const canvas = document.getElementById('sigCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
+    canvas.addEventListener('touchend', endDraw);
+    canvas.addEventListener('mousedown', (e) => startDraw(e));
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', endDraw);
+    function startDraw(pos) { drawing = true; ctx.beginPath(); ctx.moveTo(getX(pos), getY(pos)); }
+    function draw(pos) { if(!drawing) return; ctx.lineTo(getX(pos), getY(pos)); ctx.stroke(); }
+    function endDraw() { drawing = false; }
+    function getX(pos) { return pos.clientX - canvas.getBoundingClientRect().left; }
+    function getY(pos) { return pos.clientY - canvas.getBoundingClientRect().top; }
+    window.openSignatureModal = () => openModal('signatureModal');
+    window.clearSig = () => ctx.clearRect(0,0,300,150);
+    window.saveSig = () => { currentSigData = canvas.toDataURL(); document.getElementById('savedSigImg').src = currentSigData; document.getElementById('savedSigImg').style.display = 'block'; closeModal('signatureModal'); };
+
+</script>
+</body>
+</html>
