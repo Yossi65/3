@@ -1053,7 +1053,7 @@
                 </div>
             </div>
 
-            <div style="font-size: 1.2em; font-weight: bold; color: #1e293b; margin-bottom: 15px; border-right: 4px solid #3b82f6; padding-right: 10px;">פירוט השירותים</div>
+            <div style="font-size: 1.2em; font-weight: bold; color: #1e293b; margin-bottom: 15px; border-right: 4px solid #3b82f6; padding-right: 10px;">פירוט ההצעה</div>
             <div style="margin-bottom: 20px;">${servicesHtml}</div>
 
             ${notes ? `<div style="font-size: 1.2em; font-weight: bold; color: #1e293b; margin-bottom: 15px; border-right: 4px solid #3b82f6; padding-right: 10px;">הערות</div><div style="background:#fff7ed; padding:15px; border-radius:8px; border:1px solid #ffedd5;">${notes}</div>` : ''}
@@ -1296,7 +1296,7 @@
             paymentStatus = `\nשולם עד כה: ${formatCurrency(paid)} ₪\nיתרה לתשלום: *${balance} ₪*`; 
         } 
         
-        const textToCopy = `*הצעת מחיר עבור ${client}*\nתאריך: ${dateDisplay}\nמיקום: ${venue}\n\n*פירוט השירותים:*\n${servicesListText}\n------------------\n*סה"כ : ${total} ₪*${paymentStatus}\n\nבברכה,\n${businessName}`; 
+        const textToCopy = `*הצעת מחיר עבור ${client}*\nתאריך: ${dateDisplay}\nמיקום: ${venue}\n\n*פירוט ההצעה:*\n${servicesListText}\n------------------\n*סה"כ : ${total} ₪*${paymentStatus}\n\nבברכה,\n${businessName}`; 
         
         if (navigator.clipboard && navigator.clipboard.writeText) { 
             navigator.clipboard.writeText(textToCopy).then(() => showFeedback("הועתק! 📋")).catch(err => fallbackCopyTextToClipboard(textToCopy)); 
