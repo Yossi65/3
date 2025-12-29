@@ -981,7 +981,7 @@
              container.innerHTML = `<div style="text-align:center; padding:20px; color:#999;">${msg}</div>`;
         }
     }
-    // --- ייצוא לתמונה ---
+// --- ייצוא לתמונה - גרסה מעודכנת 2 ---
     function generatePrintHtmlContent() {
         const client = document.getElementById('clientName').value;
         const phone = document.getElementById('clientPhone').value;
@@ -993,7 +993,8 @@
         const notes = document.getElementById('quoteNotes').value;
         const total = document.getElementById('finalTotalCost').innerText;
         
-        const logo = appSettings.logoDataUrl ? `<img src="${appSettings.logoDataUrl}" style="max-height:100px; display:block; margin: 0 auto 20px auto;">` : '';
+        // לוגו - הוסר המירכוז, הוגדר גובה
+        const logo = appSettings.logoDataUrl ? `<img src="${appSettings.logoDataUrl}" style="max-height:90px; width:auto; display:block;">` : '';
         const bizName = appSettings.businessName || '';
         const footerText = appSettings.footerNoteText || 'תודה שבחרתם בנו!';
         const headerText = appSettings.docHeaderText || '';
@@ -1014,27 +1015,41 @@
         let phonesDisplay = phone;
         if(phone2) phonesDisplay += ` | ${phone2}`;
 
+        // סגנון להדגשת נתונים (מודגש וכהה)
+        const valueStyle = "font-weight:800; color:#1e293b; font-size:1.05em;";
+
         return `
         <div dir="rtl" style="font-family:'Rubik', sans-serif; padding:40px; color:#333; background:white; min-height:1000px;">
-            <div style="text-align:center; margin-bottom: 30px; border-bottom: 2px solid #3b82f6; padding-bottom: 20px;">
-                ${logo}
-                <h2 style="margin: 10px 0 5px 0; color: #1e293b; font-size: 1.8em;">${bizName}</h2>
-                <div style="font-size:0.9em; color:#666;">${appSettings.businessPhone || ''} | ${appSettings.businessEmail || ''}</div>
-                <div style="font-size:0.9em; margin-top:5px;">${headerText}</div>
+            
+            <div style="display:flex; align-items:center; gap:25px; margin-bottom: 30px; border-bottom: 2px solid #3b82f6; padding-bottom: 20px;">
+                
+                <div>
+                    ${logo}
+                </div>
+
+                <div style="text-align: right;">
+                    <h2 style="margin: 0; color: #1e293b; font-size: 2.2em; line-height: 1.1;">${bizName}</h2>
+                    
+                    <div style="font-size:1.2em; font-weight:800; color:#1e293b; margin-top:8px;">
+                        ${appSettings.businessPhone || ''} | ${appSettings.businessEmail || ''}
+                    </div>
+                    
+                    <div style="font-size:0.9em; margin-top:5px; color:#666;">${headerText}</div>
+                </div>
             </div>
 
             <h1 style="text-align: center; font-size: 1.6em; color: #3b82f6; margin-bottom: 30px; text-decoration: underline; text-underline-offset: 8px;">הצעת מחיר</h1>
 
             <div style="background: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px; display: flex; gap: 20px;">
-                <div style="flex: 1; line-height: 1.8;">
-                    <strong>לכבוד:</strong> ${client}<br>
-                    <strong>טלפון:</strong> ${phonesDisplay}<br>
-                    <strong>מייל:</strong> ${email}
+                <div style="flex: 1; line-height: 1.9;">
+                    <strong>לכבוד:</strong> <span style="${valueStyle}">${client}</span><br>
+                    <strong>טלפון:</strong> <span style="${valueStyle}">${phonesDisplay}</span><br>
+                    <strong>מייל:</strong> <span style="${valueStyle}">${email}</span>
                 </div>
-                <div style="flex: 1; line-height: 1.8; border-right: 1px dashed #cbd5e1; padding-right: 20px;">
-                    <strong>תאריך:</strong> ${date}<br>
-                    <strong>תאריך עברי:</strong> ${hebrewDate}<br>
-                    <strong>מיקום:</strong> ${venue}
+                <div style="flex: 1; line-height: 1.9; border-right: 1px dashed #cbd5e1; padding-right: 20px;">
+                    <strong>תאריך:</strong> <span style="${valueStyle}">${date}</span><br>
+                    <strong>תאריך עברי:</strong> <span style="${valueStyle}">${hebrewDate}</span><br>
+                    <strong>מיקום:</strong> <span style="${valueStyle}">${venue}</span>
                 </div>
             </div>
 
@@ -1047,7 +1062,7 @@
                 סה"כ : ${total}
             </div>
 
-            <div style="text-align: center; margin-top: 50px; color: #64748b; font-size: 0.9em; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+            <div style="text-align: center; margin-top: 50px; color: #4a5568; font-size: 1.1em; font-weight: 700; border-top: 1px solid #e2e8f0; padding-top: 20px;">
                 ${footerText}
             </div>
         </div>`;
